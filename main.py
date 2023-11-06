@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter import messagebox
 
 
 def generate_password():
@@ -10,12 +11,20 @@ def save_data():
     email = entry_email.get()
     password = entry_password.get()
 
-    with open("./data.txt", "a") as file:
-        file.write(
-            f"Name: {website_name} | Email: {email} | Password: {password}\n")
+    if website_name == "" or email == "" or password == "":
+        messagebox.showwarning(
+            title="Empty field", message="All fields must be completed before saving")
+    else:
+        save_info = messagebox.askokcancel(
+            title=website_name, message=f"These are the details entered:\nEmail: {email}\nPassword: {password}\nIs it ok to save?")
 
-    entry_website.delete("0", END)
-    entry_password.delete("0", END)
+        if save_info:
+            with open("./data.txt", "a") as file:
+                file.write(
+                    f"Name: {website_name} | Email: {email} | Password: {password}\n")
+
+            entry_website.delete("0", END)
+            entry_password.delete("0", END)
 
 
 window = Tk()
