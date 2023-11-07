@@ -1,9 +1,24 @@
+import pyperclip
 from tkinter import *
 from tkinter import messagebox
+from random import choice, randint, shuffle
 
 
 def generate_password():
-    pass
+    entry_password.delete(0, END)
+    letters = "abcdefghijklmnopqrstvwxqz" + "abcdefghijklmnopqrstvwxqz".upper()
+    symbols = "!@#$%^&*?()+"
+    numbers = '1234567890'
+
+    password_letters = [choice(letters) for _ in range(randint(8, 10))]
+    password_symbols = [choice(symbols) for _ in range(randint(2, 4))]
+    password_number = [choice(numbers) for _ in range(randint(2, 4))]
+
+    password = password_letters + password_number + password_symbols
+
+    shuffle(password)
+    password = "".join(password)
+    entry_password.insert(0, f"{password}")
 
 
 def save_data():
@@ -23,6 +38,7 @@ def save_data():
                 file.write(
                     f"Name: {website_name} | Email: {email} | Password: {password}\n")
 
+            pyperclip.copy(password)
             entry_website.delete("0", END)
             entry_password.delete("0", END)
 
