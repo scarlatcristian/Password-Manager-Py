@@ -1,7 +1,24 @@
 import pyperclip
+import json
 from tkinter import *
 from tkinter import messagebox
 from random import choice, randint, shuffle
+
+
+def find_password():
+    website_name = entry_website.get().lower()
+    try:
+        with open("./data.json", "r") as file:
+            data = json.load(file)
+    except (FileNotFoundError, json.decoder.JSONDecodeError):
+        messagebox.showwarning(message="No Data File Found")
+
+    if website_name in data:
+        messagebox.showinfo(title=website_name.capitalize(),
+                            message=f"Email: {data[website_name]['Email']}\nPassword: {data[website_name]['Password']}")
+    else:
+        messagebox.showinfo(
+            title="Error", message=f"No details for {website_name} exists.")
 
 
 def generate_password():
@@ -25,19 +42,31 @@ def save_data():
     website_name = entry_website.get()
     email = entry_email.get()
     password = entry_password.get()
+    new_data = {website_name.lower(): {
+        "Email": email,
+        "Password": password
+    }
+    }
 
     if website_name == "" or email == "" or password == "":
         messagebox.showwarning(
             title="Empty field", message="All fields must be completed before saving")
     else:
-        save_info = messagebox.askokcancel(
-            title=website_name, message=f"These are the details entered:\nEmail: {email}\nPassword: {password}\nIs it ok to save?")
+        try:
+            with open("data.json", "r") as file:
+                # Reading old data
+                data = json.load(file)
+        except (FileNotFoundError, json.decoder.JSONDecodeError):
+            with open("data.json", "w") as file:
+                json.dump(new_data, file, indent=4)
+        else:
+            # Update old data with new data
+            data.update(new_data)
 
-        if save_info:
-            with open("./data.txt", "a") as file:
-                file.write(
-                    f"Name: {website_name} | Email: {email} | Password: {password}\n")
-
+            with open("data.json", "w") as file:
+                # Saving updated data
+                json.dump(data, file, indent=4)
+        finally:
             pyperclip.copy(password)
             entry_website.delete("0", END)
             entry_password.delete("0", END)
@@ -64,9 +93,9 @@ label_password = Label(text="Password:")
 label_password.grid(row=3, column=0)
 
 # Inputs
-entry_website = Entry(width=36)
+entry_website = Entry(width=21)
 entry_website.focus()
-entry_website.grid(row=1, column=1, columnspan=2)
+entry_website.grid(row=1, column=1)
 
 entry_email = Entry(width=36)
 entry_email.insert(0, "test@gmail.com")
@@ -82,5 +111,8 @@ btn_generate_password.grid(row=3, column=2)
 
 btn_add = Button(text="Add", width=34, command=save_data)
 btn_add.grid(row=4, column=1, columnspan=2)
+
+btn_search = Button(text="Search", width=11, command=find_password)
+btn_search.grid(row=1, column=2)
 
 window.mainloop()
